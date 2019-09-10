@@ -83,6 +83,7 @@
  * M8   - Turn flood coolant ON. (Requires COOLANT_CONTROL)
  * M9   - Turn coolant OFF. (Requires COOLANT_CONTROL)
  * M12  - Set up closed loop control system. (Requires EXTERNAL_CLOSED_LOOP_CONTROLLER)
+ * M16  - Expected printer check. (Requires EXPECTED_PRINTER_CHECK)
  * M17  - Enable/Power all stepper motors
  * M18  - Disable all stepper motors; same as M84
  * M20  - List SD card. (Requires SDSUPPORT)
@@ -131,7 +132,7 @@
  *        If AUTOTEMP is enabled, S<mintemp> B<maxtemp> F<factor>. Exit autotemp by any M109 without F
  * M110 - Set the current line number. (Used by host printing)
  * M111 - Set debug flags: "M111 S<flagbits>". See flag bits defined in enum.h.
- * M112 - Emergency stop.
+ * M112 - Full Shutdown.
  * M113 - Get or set the timeout interval for Host Keepalive "busy" messages. (Requires HOST_KEEPALIVE_FEATURE)
  * M114 - Report current position.
  * M115 - Report capabilities. (Extended capabilities requires EXTENDED_CAPABILITIES_REPORT)
@@ -472,6 +473,10 @@ private:
     static void M12();
   #endif
 
+  #if ENABLED(EXPECTED_PRINTER_CHECK)
+    static void M16();
+  #endif
+
   static void M17();
 
   static void M18_M84();
@@ -538,10 +543,17 @@ private:
     static void M100();
   #endif
 
-  static void M104();
+  #if EXTRUDERS
+    static void M104();
+    static void M109();
+  #endif
+
   static void M105();
-  static void M106();
-  static void M107();
+
+  #if FAN_COUNT > 0
+    static void M106();
+    static void M107();
+  #endif
 
   #if DISABLED(EMERGENCY_PARSER)
     static void M108();
@@ -551,8 +563,6 @@ private:
       static void M876();
     #endif
   #endif
-
-  static void M109();
 
   static void M110();
   static void M111();
@@ -594,7 +604,7 @@ private:
     //static void M191();
   #endif
 
-  #if HAS_LCD_MENU
+  #if HOTENDS && HAS_LCD_MENU
     static void M145();
   #endif
 
@@ -655,7 +665,11 @@ private:
   #endif
 
   static void M220();
-  static void M221();
+
+  #if EXTRUDERS
+    static void M221();
+  #endif
+
   static void M226();
 
   #if ENABLED(PHOTO_GCODE)
